@@ -1,0 +1,8 @@
+{
+    "representation": "vector",
+    "model": "cnn",
+    "loss": "mse",
+    "vector_dim": 64,
+    "class_num": 8,
+    "kernel_size": 5
+}
