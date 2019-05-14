@@ -1,8 +1,18 @@
 {
-    "representation": "vector",
-    "model": "cnn",
-    "loss": "mse",
+    "representation": "WordVector",
+    "sgns_model": "sgns.sogou.word",
+    "dataset": "data",
+    "train": "sinanews.train",
+    "test": "sinanews.test",
+    "preload_w2v": false,
+    "epoch": 100,
+    "learning_rate": 0.001,
+    "train_batch_size": 128,
+    "test_batch_size": 128,
+    "model": "CNN",
+    "loss": "cel",
     "vector_dim": 64,
+    "filter_num": 128,
     "class_num": 8,
     "kernel_size": 5
 }
