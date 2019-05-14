@@ -1,5 +1,6 @@
 import argparse
 import json
+import torch
 
 from dataset import get_dataset
 import model as Model
@@ -13,6 +14,7 @@ if __name__ == "__main__":
     with open(config_path, 'r') as f:
         config = json.load(f)
 
+    config['cuda'] = config['cuda'] and torch.cuda.is_available()
     train_iter, test_iter = get_dataset(config)
     model = getattr(Model, config['model'])(config)
     trainer = Trainer.trainer(config, train_iter, test_iter, model)

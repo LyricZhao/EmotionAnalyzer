@@ -16,8 +16,9 @@ class CNN(nn.Module):
 
         self.embedding = nn.Embedding(self.vocabulary_size, self.vector_dim)
         if config['preload_w2v']:
-            self.embedding = self.embedding.from_pretrained(config.vectors, freeze=True)
+            self.embedding = self.embedding.from_pretrained(config['vectors'], freeze=config['freeze'])
         self.conv = nn.Conv2d(in_channels=1, out_channels=self.filter_num, kernel_size=(self.kernel_size, self.vector_dim))
+        self.dropout = nn.Dropout(config['dropout'])
         self.fc = nn.Linear(self.filter_num, self.class_num)
 
     def forward(self, x):
@@ -27,6 +28,7 @@ class CNN(nn.Module):
         x = F.relu(x).squeeze(3) # x: (batch_size, filter_num, len - kernel_size + 1)
         x = F.max_pool1d(x, x.size(2)) # x: (batch_size, filter_num, 1)
         x = x.squeeze(2) # x: (batch_size, filter_num, 1)
+        x = self.dropout(x)
         x = self.fc(x) # x: (batch_size, class_num)
         return x
         

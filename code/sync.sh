@@ -1,0 +1,1 @@
+rsync -azv ../../EmotionAnalyzer gorgon:~/

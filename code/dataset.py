@@ -24,11 +24,10 @@ def get_dataset(config):
         fields=[('index', None), ('label', label_field), ('text', text_field)]
     )
     if config['preload_w2v']:
-        vectors = Vectors(name=config['sgns_model'], cache=config['sgns_model'])
+        vectors = Vectors(name=config['sgns_model'], cache='sgns')
         text_field.build_vocab(train_dataset, test_dataset, vectors=vectors)
     else:
         text_field.build_vocab(train_dataset, test_dataset)
-    # label_field.build_vocab(train_dataset, test_dataset)
     train_iter, test_iter = data.Iterator.splits(
         (train_dataset, test_dataset),
         batch_sizes=(config['train_batch_size'], config['test_batch_size']),
@@ -36,5 +35,5 @@ def get_dataset(config):
     )
     config['vocabulary_size'] = len(text_field.vocab)
     if config['preload_w2v']:
-        config.vectors = text_field.vocab.vectors
+        config['vectors'] = text_field.vocab.vectors
     return train_iter, test_iter
