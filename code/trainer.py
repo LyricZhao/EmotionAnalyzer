@@ -24,11 +24,11 @@ class trainer(object):
         print('[!] Training epoch {} ... '.format(epoch), flush=True)
         for iteration, batch in enumerate(self.train_iter):
             self.optimizer.zero_grad()
-            input, target = batch.text, batch.label
+            (input, lengths), target = batch.text, batch.label
             if self.cuda:
                 input, target = input.cuda(), target.cuda()
             target = target.squeeze(1)
-            output = self.model(input)
+            output = self.model(input, lengths)
             loss = self.loss(output, target)
             loss.backward()
             self.optimizer.step()
@@ -40,11 +40,11 @@ class trainer(object):
         self.model.eval()
         size, tot = 0, 0
         for iteration, batch in enumerate(self.test_iter):
-            input, target = batch.text, batch.label
+            (input, lengths), target = batch.text, batch.label
             if self.cuda:
                 input, target = input.cuda(), target.cuda()
             target = target.squeeze(1)
-            output = self.model(input)
+            output = self.model(input, lengths)
             size += target.shape[0]
             tot += (torch.max(output, 1)[1].view(target.size()).data == target.data).sum()
         print('[!] Acc: {:.5f}'.format(float(tot) / size), flush=True)

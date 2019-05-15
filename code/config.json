@@ -5,11 +5,11 @@
     "cuda": true,
     "train": "sinanews.train",
     "test": "sinanews.test",
-    "preload_w2v": false,
+    "preload_w2v": true,
     "epoch": 100,
     "dropout": 0,
-    "freeze": false,
-    "learning_rate": 0.0001,
+    "freeze": true,
+    "learning_rate": 0.01,
     "train_batch_size": 128,
     "test_batch_size": 128,
     "model": "RNN",
@@ -18,6 +18,6 @@
     "filter_num": 256,
     "class_num": 8,
     "kernel_size": 5,
-    "hidden_dim": 512,
+    "hidden_dim": 128,
     "lstm_layers": 4
 }

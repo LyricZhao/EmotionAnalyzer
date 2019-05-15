@@ -21,7 +21,7 @@ class CNN(nn.Module):
         self.dropout = nn.Dropout(config['dropout'])
         self.fc = nn.Linear(self.filter_num, self.class_num)
 
-    def forward(self, x):
+    def forward(self, x, lengths):
         x = x.unsqueeze(1) # x: (batch_size, 1, len)
         x = self.embedding(x) # x: (batch_size, 1, len, wv_dim)
         x = self.conv(x) # x: (batch_size, filter_num, len - kernel_size + 1, 1)
@@ -31,6 +31,8 @@ class CNN(nn.Module):
         x = self.dropout(x)
         x = self.fc(x) # x: (batch_size, class_num)
         return x
+
+pack_padded_sequence = nn.utils.rnn.pack_padded_sequence
 
 class RNN(nn.Module):
     def __init__(self, config):
@@ -46,14 +48,15 @@ class RNN(nn.Module):
         self.embedding = nn.Embedding(self.vocabulary_size, self.vector_dim)
         if config['preload_w2v']:
             self.embedding = self.embedding.from_pretrained(config['vectors'], freeze=config['freeze'])
-        self.lstm = nn.LSTM(self.vector_dim, self.hidden_dim, batch_first=True, dropout=config['dropout'], num_layers=self.layers)
+        self.lstm = nn.LSTM(self.vector_dim, self.hidden_dim, batch_first=True, num_layers=self.layers)
         self.fc = nn.Linear(self.hidden_dim, self.class_num)
     
-    def forward(self, x):
+    def forward(self, x, lengths):
         # x: (batch_size, len)
         x = self.embedding(x) # x: (batch_size, len, wv_dim)
-        x, hc = self.lstm(x) # x: (batch_size, len, hidden_dim)
-        x = x[:, -1, :] # x: (batch_size, hidden_dim)
-        x = self.fc(F.relu(x)) # x: (batch_size, class_num)
+        x = pack_padded_sequence(x, lengths, batch_first=True)
+        x, (h, c) = self.lstm(x) # x: (batch_size, len, hidden_dim)
+        x = h[-1, :, :] # x: (batch_size, hidden_dim)
+        x = self.fc(x) # x: (batch_size, class_num)
         return x
         
