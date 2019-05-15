@@ -20,6 +20,7 @@ class trainer(object):
             self.model = self.model.cuda()
 
     def train_epoch(self, epoch):
+        self.model.train()
         print('[!] Training epoch {} ... '.format(epoch), flush=True)
         for iteration, batch in enumerate(self.train_iter):
             self.optimizer.zero_grad()
@@ -31,7 +32,7 @@ class trainer(object):
             loss = self.loss(output, target)
             loss.backward()
             self.optimizer.step()
-            # print(' -  Epoch[{}] ({}/{}): loss: {:.4f}'.format(epoch, iteration + 1, len(self.train_iter), loss.item()), flush=True)
+            print(' -  Epoch[{}] ({}/{}): loss: {:.4f}'.format(epoch, iteration + 1, len(self.train_iter), loss.item()), flush=True)
         print('[!] Done !', flush=True)
 
     def evaluate(self):

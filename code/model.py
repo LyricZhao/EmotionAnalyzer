@@ -31,4 +31,29 @@ class CNN(nn.Module):
         x = self.dropout(x)
         x = self.fc(x) # x: (batch_size, class_num)
         return x
+
+class RNN(nn.Module):
+    def __init__(self, config):
+        super(RNN, self).__init__()
+        self.vector_dim = config['vector_dim']
+        self.class_num = config['class_num']
+        self.vocabulary_size = config['vocabulary_size']
+        self.hidden_dim = config['hidden_dim']
+        self.layers = config['lstm_layers']
+        self.use_cuda = config['cuda']
+        self.batch_size = config['train_batch_size']
+
+        self.embedding = nn.Embedding(self.vocabulary_size, self.vector_dim)
+        if config['preload_w2v']:
+            self.embedding = self.embedding.from_pretrained(config['vectors'], freeze=config['freeze'])
+        self.lstm = nn.LSTM(self.vector_dim, self.hidden_dim, batch_first=True, dropout=config['dropout'], num_layers=self.layers)
+        self.fc = nn.Linear(self.hidden_dim, self.class_num)
+    
+    def forward(self, x):
+        # x: (batch_size, len)
+        x = self.embedding(x) # x: (batch_size, len, wv_dim)
+        x, hc = self.lstm(x) # x: (batch_size, len, hidden_dim)
+        x = x[:, -1, :] # x: (batch_size, hidden_dim)
+        x = self.fc(F.relu(x)) # x: (batch_size, class_num)
+        return x
         
