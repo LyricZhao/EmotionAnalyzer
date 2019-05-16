@@ -17,7 +17,10 @@ def label_filter(label):
     return [max_id]
 
 def get_dataset(config):
-    text_field, label_field = data.Field(lower=True, sequential=True, batch_first=True, include_lengths=True), data.Field(batch_first=True, use_vocab=False)
+    if config['model'] == 'MLP':
+        text_field, label_field = data.Field(lower=True, sequential=True, batch_first=True, include_lengths=True, fix_length=config['fix_length']), data.Field(batch_first=True, use_vocab=False)
+    else:
+        text_field, label_field = data.Field(lower=True, sequential=True, batch_first=True, include_lengths=True), data.Field(batch_first=True, use_vocab=False)
     text_field.tokenize, label_field.tokenize = text_filter, label_filter
     train_dataset, test_dataset = data.TabularDataset.splits(
         path=config['dataset'], format='tsv', skip_header=True,
