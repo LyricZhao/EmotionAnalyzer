@@ -64,7 +64,7 @@ class RNN(nn.Module):
         self.class_num = config['class_num']
         self.vocabulary_size = config['vocabulary_size']
         self.hidden_dim = config['hidden_dim']
-        self.layers = config['lstm_layers']
+        self.layers = config['rnn_layers']
         self.use_cuda = config['cuda']
         self.batch_size = config['train_batch_size']
         self.rnn_type = config['rnn_type']
