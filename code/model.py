@@ -30,6 +30,7 @@ class CNN(nn.Module):
         x = x.squeeze(2) # x: (batch_size, filter_num, 1)
         x = self.dropout(x)
         x = self.fc(x) # x: (batch_size, class_num)
+        x = F.log_softmax(x, dim=1)
         return x
 
 pack_padded_sequence = nn.utils.rnn.pack_padded_sequence
@@ -44,19 +45,28 @@ class RNN(nn.Module):
         self.layers = config['lstm_layers']
         self.use_cuda = config['cuda']
         self.batch_size = config['train_batch_size']
+        self.rnn_type = config['rnn_type']
 
         self.embedding = nn.Embedding(self.vocabulary_size, self.vector_dim)
         if config['preload_w2v']:
             self.embedding = self.embedding.from_pretrained(config['vectors'], freeze=config['freeze'])
-        self.lstm = nn.LSTM(self.vector_dim, self.hidden_dim, batch_first=True, num_layers=self.layers)
+        if self.rnn_type == 'lstm':
+            self.rnn = nn.LSTM(self.vector_dim, self.hidden_dim, batch_first=True, dropout=config['dropout'], num_layers=self.layers, bidirectional=config['bidirectional'])
+        else:
+            self.rnn = nn.GRU(self.vector_dim, self.hidden_dim, batch_first=True, dropout=config['dropout'], num_layers=self.layers, bidirectional=config['bidirectional'])
         self.fc = nn.Linear(self.hidden_dim, self.class_num)
     
     def forward(self, x, lengths):
         # x: (batch_size, len)
         x = self.embedding(x) # x: (batch_size, len, wv_dim)
         x = pack_padded_sequence(x, lengths, batch_first=True)
-        x, (h, c) = self.lstm(x) # x: (batch_size, len, hidden_dim)
-        x = h[-1, :, :] # x: (batch_size, hidden_dim)
+        if self.rnn_type == 'lstm':
+            x, (h, c) = self.rnn(x) # x: (batch_size, len, hidden_dim)
+            x = h[-1, :, :] # x: (batch_size, hidden_dim)
+        else:
+            x, h = self.rnn(x) # x: (batch_size, len, hidden_dim)
+            x = h[-1, :, :] # x: (batch_size, hidden_dim)
         x = self.fc(x) # x: (batch_size, class_num)
+        x = F.log_softmax(x, dim=1)
         return x
         

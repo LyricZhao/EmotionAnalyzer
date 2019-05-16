@@ -29,7 +29,7 @@ def get_dataset(config):
         text_field.build_vocab(train_dataset, test_dataset, vectors=vectors)
     else:
         text_field.build_vocab(train_dataset, test_dataset)
-    train_iter, test_iter = data.BucketIterator.splits(
+    train_iter, test_iter = data.Iterator.splits(
         (train_dataset, test_dataset),
         batch_sizes=(config['train_batch_size'], config['test_batch_size']),
         sort_key=lambda x: len(x.text), repeat=False, shuffle=True, sort_within_batch=True
