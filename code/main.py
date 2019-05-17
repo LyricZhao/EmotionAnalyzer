@@ -15,6 +15,7 @@ if __name__ == "__main__":
         config = json.load(f)
 
     config['cuda'] = config['cuda'] and torch.cuda.is_available()
+    print(config)
     train_iter, test_iter = get_dataset(config)
     model = getattr(Model, config['model'])(config)
     trainer = Trainer.trainer(config, train_iter, test_iter, model)
