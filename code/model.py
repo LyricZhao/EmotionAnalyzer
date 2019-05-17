@@ -17,13 +17,15 @@ class MLP(nn.Module):
         self.embedding = nn.Embedding(self.vocabulary_size, self.vector_dim)
         if config['preload_w2v']:
             self.embedding = self.embedding.from_pretrained(config['vectors'], freeze=config['freeze'])
+        self.dropout = nn.Dropout(config['dropout'])
         self.fc1 = nn.Linear(self.fix_length * self.vector_dim, self.hidden_dim)
         self.fc2 = nn.Linear(self.hidden_dim, self.class_num)
 
     def forward(self, x, lengths):
         x = self.embedding(x) # x: (batch_size, len, wv_dim)
         x = x.view(x.size(0), -1) # x: (batch_size, len * wv_dim)
-        x = self.fc2(self.fc1(x)) # x: (batch_size, class_num)
+        x = self.dropout(self.fc1(x))
+        x = self.fc2(x) # x: (batch_size, class_num)
         return x
 
 class CNN(nn.Module):

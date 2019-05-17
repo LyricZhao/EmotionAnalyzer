@@ -66,7 +66,9 @@ class trainer(object):
         pearson = pearson_sum / len(pred)
         print('[!] Result on {}: acc={:.5f} f_score={:.5f} pearson={:.5f}'.format(comment, acc, f_score, pearson), flush=True)
         if self.tensorboard:
-            self.writer.add_scalar('test/acc_' + comment, acc, epoch)
+            self.writer.add_scalar(comment + '/acc', acc, epoch)
+            self.writer.add_scalar(comment + '/f_score', acc, epoch)
+            self.writer.add_scalar(comment + '/pearson', acc, epoch)
 
     def train(self):
         self.global_iter = 0
