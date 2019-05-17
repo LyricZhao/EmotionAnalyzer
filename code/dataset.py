@@ -9,12 +9,13 @@ def text_filter(text):
 
 def label_filter(label):
     label = [int(x) for x in re.findall(r'\d+', label)][1:]
+    dist = [x for x in label]
     max_count, max_id = -1, 0
     for i in range(8):
         if label[i] > max_count:
             max_count, max_id = label[i], i
     assert max_id < 8
-    return [max_id]
+    return [max_id] + dist
 
 def get_dataset(config):
     if config['model'] == 'MLP':

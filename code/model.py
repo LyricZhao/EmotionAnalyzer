@@ -24,7 +24,6 @@ class MLP(nn.Module):
         x = self.embedding(x) # x: (batch_size, len, wv_dim)
         x = x.view(x.size(0), -1) # x: (batch_size, len * wv_dim)
         x = self.fc2(self.fc1(x)) # x: (batch_size, class_num)
-        x = F.log_softmax(x, dim=1)
         return x
 
 class CNN(nn.Module):
@@ -52,7 +51,6 @@ class CNN(nn.Module):
         x = x.squeeze(2) # x: (batch_size, filter_num, 1)
         x = self.dropout(x)
         x = self.fc(x) # x: (batch_size, class_num)
-        x = F.log_softmax(x, dim=1)
         return x
 
 pack_padded_sequence = nn.utils.rnn.pack_padded_sequence
@@ -89,6 +87,5 @@ class RNN(nn.Module):
             x, h = self.rnn(x) # x: (batch_size, len, hidden_dim)
             x = h[-1, :, :] # x: (batch_size, hidden_dim)
         x = self.fc(x) # x: (batch_size, class_num)
-        x = F.log_softmax(x, dim=1)
         return x
         

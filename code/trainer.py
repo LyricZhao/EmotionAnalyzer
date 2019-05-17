@@ -3,7 +3,8 @@ import torch.nn as nn
 import torch.optim as optim
 import torch.nn.functional as F
 
-from tensorboardX import SummaryWriter
+from sklearn import metrics
+from scipy.stats import pearsonr
 
 class trainer(object):
     def __init__(self, config, train_iter, test_iter, model):
@@ -16,13 +17,11 @@ class trainer(object):
         self.global_iter = 0
         self.tensorboard = config['tensorboard']
         self.optimizer = optim.Adam(self.model.parameters(), lr=config['learning_rate'])
-        if config['loss'] == 'mse':
-            self.loss = nn.MSELoss()
-        elif config['loss'] == 'cel':
-            self.loss = nn.CrossEntropyLoss()
+        self.loss = nn.CrossEntropyLoss()
         if self.cuda:
             self.model = self.model.cuda()
         if self.tensorboard:
+            from tensorboardX import SummaryWriter
             self.writer = SummaryWriter(comment=config['comment'])
 
     def train_epoch(self, epoch):
@@ -33,7 +32,7 @@ class trainer(object):
             (input, lengths), target = batch.text, batch.label
             if self.cuda:
                 input, target = input.cuda(), target.cuda()
-            target = target.squeeze(1)
+            target = target[:, 0]
             output = self.model(input, lengths)
             loss = self.loss(output, target)
             loss.backward()
@@ -47,17 +46,25 @@ class trainer(object):
     def evaluate(self, iter, comment, epoch):
         print('[!] Evaluating results ... ', flush=True)
         self.model.eval()
-        size, tot = 0, 0
+        pred, real = [], []
+        pearson_sum = 0.0
         for iteration, batch in enumerate(iter):
             (input, lengths), target = batch.text, batch.label
             if self.cuda:
                 input, target = input.cuda(), target.cuda()
-            target = target.squeeze(1)
             output = self.model(input, lengths)
-            size += target.shape[0]
-            tot += (torch.max(output, 1)[1].view(target.size()).data == target.data).sum()
-        acc = float(tot) / size
-        print('[!] Acc on {}: {:.5f}'.format(comment, acc), flush=True)
+            output = F.softmax(output, dim=1)
+            pred = pred + torch.max(output, 1)[1].view(target[:, 0].size()).data.tolist()
+            real = real + target[:, 0].data.tolist()
+            output, target = output.detach().cpu(), target.detach().cpu()
+            for i in range(output.size(0)):
+                dist = target[i, 1:].float()
+                dist = dist / torch.sum(dist, dim=0)
+                pearson_sum += pearsonr(output[i, :], dist)[0]
+        acc = metrics.accuracy_score(real, pred)
+        f_score = metrics.f1_score(real, pred, average='macro')
+        pearson = pearson_sum / len(pred)
+        print('[!] Result on {}: acc={:.5f} f_score={:.5f} pearson={:.5f}'.format(comment, acc, f_score, pearson), flush=True)
         if self.tensorboard:
             self.writer.add_scalar('test/acc_' + comment, acc, epoch)
 
