@@ -17,7 +17,11 @@ class trainer(object):
         self.global_iter = 0
         self.tensorboard = config['tensorboard']
         self.optimizer = optim.Adam(self.model.parameters(), lr=config['learning_rate'])
-        self.loss = nn.CrossEntropyLoss()
+        self.loss_c = config['loss']
+        if self.loss_c == 'cel':
+            self.loss = nn.CrossEntropyLoss()
+        else:
+            self.loss_c = nn.MSELoss()
         if self.cuda:
             self.model = self.model.cuda()
         if self.tensorboard:
@@ -32,9 +36,14 @@ class trainer(object):
             (input, lengths), target = batch.text, batch.label
             if self.cuda:
                 input, target = input.cuda(), target.cuda()
-            target = target[:, 0]
             output = self.model(input, lengths)
-            loss = self.loss(output, target)
+            if self.loss_c == 'cel':
+                target = target[:, 0]
+                loss = self.loss(output, target)
+            else:
+                target = target[:, 1:].float()
+                target = target / torch.sum(target, dim=0)
+                loss = self.loss(F.softmax(output, dim=1), target)
             loss.backward()
             self.optimizer.step()
             print(' -  Epoch[{}] ({}/{}): loss: {:.4f}'.format(epoch, iteration + 1, len(self.train_iter), loss.item()), flush=True)
