@@ -13,6 +13,7 @@ class trainer(object):
         self.test_iter = test_iter
         self.model = model
         self.cuda = config['cuda']
+        self.global_iter = 0
         self.tensorboard = config['tensorboard']
         self.optimizer = optim.Adam(self.model.parameters(), lr=config['learning_rate'])
         if config['loss'] == 'mse':
@@ -39,7 +40,8 @@ class trainer(object):
             self.optimizer.step()
             print(' -  Epoch[{}] ({}/{}): loss: {:.4f}'.format(epoch, iteration + 1, len(self.train_iter), loss.item()), flush=True)
             if self.tensorboard:
-                self.writer.add_scalar('train/loss', loss.item(), iteration + 1)
+                self.global_iter += 1
+                self.writer.add_scalar('train/loss', loss.item(), self.global_iter)
         print('[!] Done !', flush=True)
 
     def evaluate(self, iter, comment, epoch):
@@ -60,6 +62,7 @@ class trainer(object):
             self.writer.add_scalar('test/acc_' + comment, acc, epoch)
 
     def train(self):
+        self.global_iter = 0
         for epoch in range(1, self.epoch + 1):
             self.train_epoch(epoch)
             self.evaluate(self.train_iter, 'train_dataset', epoch)
