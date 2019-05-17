@@ -76,8 +76,8 @@ class trainer(object):
         print('[!] Result on {}: acc={:.5f} f_score={:.5f} pearson={:.5f}'.format(comment, acc, f_score, pearson), flush=True)
         if self.tensorboard:
             self.writer.add_scalar(comment + '/acc', acc, epoch)
-            self.writer.add_scalar(comment + '/f_score', acc, epoch)
-            self.writer.add_scalar(comment + '/pearson', acc, epoch)
+            self.writer.add_scalar(comment + '/f_score', f_score, epoch)
+            self.writer.add_scalar(comment + '/pearson', pearson, epoch)
 
     def train(self):
         self.global_iter = 0
