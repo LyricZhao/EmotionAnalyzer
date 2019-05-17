@@ -14,6 +14,7 @@
     "train_batch_size": 128,
     "test_batch_size": 128,
     "model": "MLP",
+    "loss": "cel",
     "rnn_type": "gru",
     "bidirectional": false,
     "vector_dim": 300,
