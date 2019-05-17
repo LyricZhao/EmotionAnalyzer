@@ -10,3 +10,5 @@
 /home/zhaocg/env/bin/python3.6 main.py --config configs/rnn_lstm_with-non-static-w2v.json
 /home/zhaocg/env/bin/python3.6 main.py --config configs/rnn_lstm_with-static-w2v.json
 /home/zhaocg/env/bin/python3.6 main.py --config configs/rnn_lstm_without-w2v.json
+/home/zhaocg/env/bin/python3.6 main.py --config configs/cnn_mse_with-non-static-w2v.json
+/home/zhaocg/env/bin/python3.6 main.py --config configs/cnn_mse_with-static-w2v.json

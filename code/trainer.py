@@ -21,7 +21,7 @@ class trainer(object):
         if self.loss_c == 'cel':
             self.loss = nn.CrossEntropyLoss()
         else:
-            self.loss_c = nn.MSELoss()
+            self.loss = nn.MSELoss()
         if self.cuda:
             self.model = self.model.cuda()
         if self.tensorboard:

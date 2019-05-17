@@ -18,7 +18,7 @@
     "rnn_type": "gru",
     "bidirectional": false,
     "vector_dim": 300,
-    "filter_num": 256,
+    "filter_num": 512,
     "class_num": 8,
     "kernel_size": 5,
     "hidden_dim": 256,
