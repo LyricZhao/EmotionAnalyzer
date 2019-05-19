@@ -1,8 +1,8 @@
 {
-    "sgns_model": "sgns.sogou.word",
+    "sgns_model": "sgns.sogou.bigram-char",
     "dataset": "data",
     "cuda": true,
-    "comment": "mlp_without-w2v",
+    "comment": "mlp_without-w2v_cn",
     "tensorboard": true,
     "train": "sinanews.train",
     "test": "sinanews.test",

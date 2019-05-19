@@ -1,3 +1,4 @@
-sgns.sogou.word
+sgns/
 .DS_Store
 __pycache__
+runs
