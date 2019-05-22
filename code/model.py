@@ -4,10 +4,20 @@ import torch.nn.functional as F
 import torchtext.data as text_data
 
 from torchtext.vocab import Vectors
+from weight_init import weight_init
 
-class MLP(nn.Module):
+class Network(nn.Module):
     def __init__(self, config):
-        super(MLP, self).__init__()
+        super(Network, self).__init__()
+
+    def _initialize_weights(self):
+        for m in self.modules():
+            weight_init(m)
+                
+
+class MLP(Network):
+    def __init__(self, config):
+        super(MLP, self).__init__(config)
         self.vector_dim = config['vector_dim']
         self.class_num = config['class_num']
         self.vocabulary_size = config['vocabulary_size']
@@ -20,6 +30,7 @@ class MLP(nn.Module):
         self.dropout = nn.Dropout(config['dropout'])
         self.fc1 = nn.Linear(self.fix_length * self.vector_dim, self.hidden_dim)
         self.fc2 = nn.Linear(self.hidden_dim, self.class_num)
+        self._initialize_weights()
 
     def forward(self, x, lengths):
         x = self.embedding(x) # x: (batch_size, len, wv_dim)
@@ -28,9 +39,9 @@ class MLP(nn.Module):
         x = self.fc2(x) # x: (batch_size, class_num)
         return x
 
-class CNN(nn.Module):
+class CNN(Network):
     def __init__(self, config):
-        super(CNN, self).__init__()
+        super(CNN, self).__init__(config)
         self.vector_dim = config['vector_dim']
         self.class_num = config['class_num']
         self.kernel_size = config['kernel_size']
@@ -43,6 +54,7 @@ class CNN(nn.Module):
         self.conv = nn.Conv2d(in_channels=1, out_channels=self.filter_num, kernel_size=(self.kernel_size, self.vector_dim))
         self.dropout = nn.Dropout(config['dropout'])
         self.fc = nn.Linear(self.filter_num, self.class_num)
+        self._initialize_weights()
 
     def forward(self, x, lengths):
         x = x.unsqueeze(1) # x: (batch_size, 1, len)
@@ -57,9 +69,9 @@ class CNN(nn.Module):
 
 pack_padded_sequence = nn.utils.rnn.pack_padded_sequence
 
-class RNN(nn.Module):
+class RNN(Network):
     def __init__(self, config):
-        super(RNN, self).__init__()
+        super(RNN, self).__init__(config)
         self.vector_dim = config['vector_dim']
         self.class_num = config['class_num']
         self.vocabulary_size = config['vocabulary_size']
@@ -77,6 +89,7 @@ class RNN(nn.Module):
         else:
             self.rnn = nn.GRU(self.vector_dim, self.hidden_dim, batch_first=True, dropout=config['dropout'], num_layers=self.layers, bidirectional=config['bidirectional'])
         self.fc = nn.Linear(self.hidden_dim, self.class_num)
+        self._initialize_weights()
     
     def forward(self, x, lengths):
         # x: (batch_size, len)
@@ -86,7 +99,7 @@ class RNN(nn.Module):
             x, (h, c) = self.rnn(x) # x: (batch_size, len, hidden_dim)
             x = h[-1, :, :] # x: (batch_size, hidden_dim)
         else:
-            x, h = self.rnn(x) # x: (batch_size, len, hidden_dim)
+            x, h = self.rnn(x, self.hidden) # x: (batch_size, len, hidden_dim)
             x = h[-1, :, :] # x: (batch_size, hidden_dim)
         x = self.fc(x) # x: (batch_size, class_num)
         return x
