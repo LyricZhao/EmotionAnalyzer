@@ -14,7 +14,7 @@
 - `python3 main.py --config path_to_config`
 - configs文件夹中提供了一些config文件的示例，下面我也会具体说明
 
-###Config 示例
+### Config 示例
 
 - cnn\_with-static-w2v.json（带有固定的预训练词向量的CNN）：
 
